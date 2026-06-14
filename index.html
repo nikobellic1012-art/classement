@@ -214,6 +214,14 @@
       <div class="fg"><label>Texte footer</label><div class="crow"><input type="color" id="cl-footer" value="#383838" oninput="sc(this,'cl-footer-h');dp()"><input type="text" id="cl-footer-h" value="#383838" oninput="sh(this,'cl-footer');dp()" maxlength="7"></div></div>
     </div>
     <hr class="dv">
+        <div><div class="slbl">Logo (en-tête)</div>
+      <div class="lbox" id="logo-box"><span>Aucun logo</span></div>
+      <div style="margin-top:5px;display:flex;gap:5px;">
+        <input type="file" id="logo-f" accept="image/*" style="flex:1" onchange="loadLogo(event)">
+        <button class="btn bs bsm" onclick="clearLogo()">✕</button>
+      </div>
+    </div>
+    <hr class="dv">
     <div><div class="slbl">Image de fond</div>
       <div class="lbox" id="bg-box"><span>Aucune image</span></div>
       <div style="margin-top:5px;"><input type="file" id="bg-f" accept="image/*" style="width:100%" onchange="loadBg(event)"></div>
@@ -548,6 +556,10 @@ async function publishAll() {
         const comp = await compressImage(p.teamLogo, 160, 160, 0.85, 'image/png');
         if (comp) await chAssets.publish('assets', { type:'teamLogos', teamLogoMap:{ [p.id]: comp } });
       }
+      if (logoData) {
+        const compLogo = await compressImage(logoData, 300, 300, 0.80, 'image/png');
+        if (compLogo) await chAssets.publish('assets', { type:'logo', logo:compLogo });
+      }
       if (bgData) {
         const comp = await compressImage(bgData, 1280, 720, 0.55, 'image/jpeg');
         if (comp) await chAssets.publish('assets', { type:'bg', bg:comp, bgOpacity:cfg.style?.bgOpacity });
@@ -573,12 +585,13 @@ function pushPreview() {
     if (!fw || !fw.applyConfig) return;
     fw.applyConfig(cfg);
     // Envoyer logo et fond comme assets typés pour que l'overlay les applique correctement
+    if (logoData) { try { fw.applyAssets({ type:'logo', logo:logoData }); } catch(e){} }
     if (bgData && fw.applyAssets) fw.applyAssets({ type:'bg', bg:bgData, bgOpacity:document.getElementById('bg-op')?.value||'20' });
   } catch(e){}
 }
 
 // ═══════════════════ STATE ═══════════════════
-let pilots = [], bgData = null;
+let pilots = [], logoData = null, bgData = null;
 const MAX = 24;
 
 window.onload = () => {
@@ -745,7 +758,7 @@ function buildConfig() {
       cardBg:hexToRgba(gv('cl-cardbg')||'#121212',0.9), cardBgP1:hexToRgba(gv('cl-cardbgp1')||'#221804',0.92),
       bar:gv('c-acc')||'#D90429'
     },
-    assets:{ bg:bgData }
+    assets:{ logo:logoData, bg:bgData }
   };
 }
 
@@ -860,6 +873,27 @@ function updGradCount(){
 function toggleSb(){ const sb=document.getElementById('sb'),b=document.getElementById('btn-sb'); sb.classList.toggle('hidden'); const h=sb.classList.contains('hidden'); b.textContent=h?'▶ Params':'◀ Params'; b.className=h?'tbtn off':'tbtn on'; }
 function togglePv(){ const pv=document.getElementById('pv-panel'),b=document.getElementById('btn-pv'); pv.classList.toggle('hidden'); const h=pv.classList.contains('hidden'); b.className=h?'tbtn off':'tbtn on'; }
 setInterval(saveLocal, 30000);
+
+// ── Logo en-tête ─────────────────────────────────────────────────
+function loadLogo(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    logoData = ev.target.result;
+    const box = document.getElementById('logo-box');
+    if (box) box.innerHTML = `<img src="${logoData}" style="max-height:42px;max-width:100%;object-fit:contain;">`;
+    showToast('Logo chargé ✓'); dp();
+  };
+  r.readAsDataURL(f);
+}
+function clearLogo() {
+  logoData = null;
+  const box = document.getElementById('logo-box');
+  if (box) box.innerHTML = '<span>Aucun logo</span>';
+  const inp = document.getElementById('logo-f');
+  if (inp) inp.value = '';
+  showToast('Logo retiré'); dp();
+}
 </script>
 </body>
 </html>
