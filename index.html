@@ -272,7 +272,19 @@
       <div class="fg"><label>Date</label><div class="rrow"><input type="range" id="sz-date" min="10" max="30" value="15" oninput="rv(this,'sz-date-v');dp()"><span class="rv" id="sz-date-v">15</span></div></div>
     </div>
     <hr class="dv">
-    <div><div class="slbl">Tailles cartes (px)</div>
+    <div><div class="slbl">Avatars &amp; cartes</div>
+      <div class="fg"><label>Avatars classement (px)</label>
+        <div class="rrow"><input type="range" id="sz-av" min="24" max="96" value="52" oninput="rv(this,'sz-av-v');dp()"><span class="rv" id="sz-av-v">52</span></div>
+      </div>
+      <div class="fg"><label>Avatars podium P1 (px)</label>
+        <div class="rrow"><input type="range" id="sz-pod-av" min="60" max="300" value="182" oninput="rv(this,'sz-pod-av-v');dp()"><span class="rv" id="sz-pod-av-v">182</span></div>
+      </div>
+      <div class="fg"><label>Logos équipes (px)</label>
+        <div class="rrow"><input type="range" id="sz-logo" min="16" max="80" value="34" oninput="rv(this,'sz-logo-v');dp()"><span class="rv" id="sz-logo-v">34</span></div>
+      </div>
+    </div>
+    <hr class="dv">
+    <div><div class="slbl">Tailles textes cartes (px)</div>
       <div class="fg"><label>Numéro position</label><div class="rrow"><input type="range" id="sz-pos" min="16" max="60" value="30" oninput="rv(this,'sz-pos-v');dp()"><span class="rv" id="sz-pos-v">30</span></div></div>
       <div class="fg"><label>Nom du pilote</label><div class="rrow"><input type="range" id="sz-name" min="14" max="60" value="28" oninput="rv(this,'sz-name-v');dp()"><span class="rv" id="sz-name-v">28</span></div></div>
       <div class="fg"><label>Équipe</label><div class="rrow"><input type="range" id="sz-team" min="8" max="28" value="13" oninput="rv(this,'sz-team-v');dp()"><span class="rv" id="sz-team-v">13</span></div></div>
@@ -722,7 +734,7 @@ function buildConfig() {
     ptsGrid,
     anim:{ speed:gv('anim-spd') },
     fonts:{ title:gv('fn-title'), subtitle:gv('fn-subtitle'), meta:gv('fn-meta'), pos:gv('fn-pos'), name:gv('fn-name'), team:gv('fn-team'), points:gv('fn-points'), footer:gv('fn-footer') },
-    sizes:{ title:+gv('sz-title')||50, subtitle:+gv('sz-subtitle')||27, meta:+gv('sz-meta')||19, date:+gv('sz-date')||15, pos:+gv('sz-pos')||30, name:+gv('sz-name')||28, team:+gv('sz-team')||13, points:+gv('sz-points')||30, footer:+gv('sz-footer')||13 },
+    sizes:{ av:+gv('sz-av')||52, podAv:+gv('sz-pod-av')||182, logo:+gv('sz-logo')||34, title:+gv('sz-title')||50, subtitle:+gv('sz-subtitle')||27, meta:+gv('sz-meta')||19, date:+gv('sz-date')||15, pos:+gv('sz-pos')||30, name:+gv('sz-name')||28, team:+gv('sz-team')||13, points:+gv('sz-points')||30, footer:+gv('sz-footer')||13 },
     colors2:{
       title:gv('cl-title')||'#ffffff', subtitle:gv('cl-subtitle')||'#ffffff',
       meta:gv('cl-meta')||'#808080', date:'#606060',
@@ -765,7 +777,7 @@ function loadLocal() {
     if (c.ptsGrid && Array.isArray(c.ptsGrid)) { ptsGrid = c.ptsGrid; buildPtsGrid(); }
     if (c.anim && c.anim.speed){ sv('anim-spd',c.anim.speed); document.getElementById('anim-spd-v').textContent=c.anim.speed; }
     if (c.fonts){ ['title','subtitle','meta','pos','name','team','points','footer'].forEach(k=>sv('fn-'+k,c.fonts[k])); }
-    if (c.sizes){ ['title','subtitle','meta','date','pos','name','team','points','footer'].forEach(k=>{ const v=c.sizes[k]; if(!v)return; sv('sz-'+k,v); const e=document.getElementById('sz-'+k+'-v'); if(e)e.textContent=v; }); }
+    if (c.sizes){ ['av','podAv','logo','title','subtitle','meta','date','pos','name','team','points','footer'].forEach(k=>{ const v=c.sizes[k]; if(!v)return; sv('sz-'+k,v); const e=document.getElementById('sz-'+k+'-v'); if(e)e.textContent=v; }); }
     if (c.colors2){
       const map={ title:'cl-title', subtitle:'cl-subtitle', meta:'cl-meta', posTxt:'cl-postxt', name:'cl-name', team:'cl-team', points:'cl-points', footer:'cl-footer' };
       Object.entries(map).forEach(([k,id])=>{ const v=c.colors2[k]; if(!v)return; const hex=v.startsWith('#')?v:rgbaToHex(v); if(hex)scp(id,id+'-h',hex); });
@@ -817,7 +829,7 @@ function loadJSON(e){
       if (c.ptsGrid && Array.isArray(c.ptsGrid)) { ptsGrid = c.ptsGrid; buildPtsGrid(); }
       if (c.anim && c.anim.speed){ sv('anim-spd',c.anim.speed); document.getElementById('anim-spd-v').textContent=c.anim.speed; }
       if (c.fonts){ ['title','subtitle','meta','pos','name','team','points','footer'].forEach(k=>sv('fn-'+k,c.fonts[k])); }
-      if (c.sizes){ ['title','subtitle','meta','date','pos','name','team','points','footer'].forEach(k=>{ const v=c.sizes[k]; if(!v)return; sv('sz-'+k,v); const el=document.getElementById('sz-'+k+'-v'); if(el)el.textContent=v; }); }
+      if (c.sizes){ ['av','podAv','logo','title','subtitle','meta','date','pos','name','team','points','footer'].forEach(k=>{ const v=c.sizes[k]; if(!v)return; sv('sz-'+k,v); const id_map={podAv:'sz-pod-av',logo:'sz-logo',av:'sz-av'}; const sz_id=id_map[k]||('sz-'+k); const el=document.getElementById(sz_id+'-v'); if(el)el.textContent=v; }); }
       if (c.colors2){
         const map={ title:'cl-title', subtitle:'cl-subtitle', meta:'cl-meta', posTxt:'cl-postxt', name:'cl-name', team:'cl-team', points:'cl-points', footer:'cl-footer' };
         Object.entries(map).forEach(([k,id])=>{ const v=c.colors2[k]; if(!v)return; const hex=v.startsWith('#')?v:rgbaToHex(v); if(hex)scp(id,id+'-h',hex); });
